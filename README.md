@@ -1,6 +1,8 @@
 # comfyui-enable-tls
 Overrides to enable tls for https:// and wss:// for comfyui
 Take these files and put them in the root of the project.  
+install cryptography package in your venv for generate_certificate to work
+python -m pip install cryptography
 
 i.e.- main_https.py next to main.py
 override_server.py next to server.py
