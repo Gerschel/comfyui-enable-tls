@@ -20,8 +20,9 @@ async def run(server, address='', port=8188, verbose=True, call_on_start=None):
 with open("main.py", 'r') as main_file:
     main_file_lines = main_file.readlines()
 
-start_line = next(i for i, line in enumerate(main_file_lines) if line.startswith("if __name__ =="))
+#Iterate backwards through file to find the last occurence of "if __name__ == '__main__'" becuase there are more than one
+start_line = len(main_file_lines) - next(i for i, line in enumerate(main_file_lines) if line.startswith("if __name__ =="))
 #I know there is no ws:// in this section, but I'm replacing it just in case it gets added in the future
-code_to_exec = "".join(main_file_lines[start_line:]).replace("http://", "https://").replace("ws://", "wss://")
+code_to_exec = "".join(main_file_lines[start_line - 1:]).replace("http://", "https://").replace("ws://", "wss://")
 
 exec(code_to_exec)
