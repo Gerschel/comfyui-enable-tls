@@ -8,6 +8,7 @@ import datetime
 
 class CertificateAuthority:
     CA_CERT_FILE = "./ca_certificate.pem"
+    CA_CERT_FILE_DER = "ca_certificate.der"
     CA_KEY_FILE = "./ca_private_key.pem"
 
     @staticmethod
@@ -35,7 +36,8 @@ class CertificateAuthority:
         )
 
         # CA's subject and issuer details
-        print("************ Generating Central Authority Certificate ************")
+        print("************ Generating Certificate Authority cert ************")
+        print("The text you put in will help you and the browser identify the CA")
         common_name = input("Enter the common name for the CA (Enter whatever you want): ")
         organization_name = input("Enter the organization name for the CA (Enter whatever you want): ")
         organizational_unit_name = input("Enter the organizational unit name for the CA (Enter whatever you want): ")
@@ -77,6 +79,13 @@ class CertificateAuthority:
 
         with open(CertificateAuthority.CA_CERT_FILE, "wb") as f:
             f.write(ca_cert.public_bytes(Encoding.PEM))
+        
+        with open(CertificateAuthority.CA_CERT_FILE_DER, "wb") as f:
+            f.write(ca_cert.public_bytes(Encoding.DER))
+        
+        print("************ Certificate Authority cert Generated ************")
+        print("CA's pem and der formats are written to: ", CertificateAuthority.CA_KEY_FILE, CertificateAuthority.CA_CERT_FILE, CertificateAuthority.CA_CERT_FILE_DER)
+        input("Press Enter to continue...")
 
         return ca_private_key, ca_cert
 

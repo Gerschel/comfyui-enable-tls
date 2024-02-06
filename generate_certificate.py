@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
 import datetime
+import ipaddress
 
 import socket
 
@@ -52,9 +53,9 @@ cert = x509.CertificateBuilder().subject_name(
 ).add_extension(
     x509.SubjectAlternativeName([
         x509.DNSName(u"localhost"),
-        x509.IPAddress(ip_address),
-        x509.IPAddress('0.0.0.0'),
-    ])
+        x509.IPAddress(ipaddress.ip_address(ip_address)),
+        x509.IPAddress(ipaddress.ip_address('0.0.0.0')),
+    ]), critical=False
 ).sign(CertificateAuthority.get_ca_key(), hashes.SHA256())
 
 # Write servers private key and certificate
