@@ -6,6 +6,13 @@ from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat
 import datetime
 
 import socket
+
+from certificate_authority import CertificateAuthority
+
+##! For dev purpose to regenerate the CA on each launch
+#CertificateAuthority.generate_ca()
+
+
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("10.255.255.255", 1))
@@ -18,13 +25,16 @@ ip_address = get_ip_address()
 
 # Generate private key
 private_key = ec.generate_private_key(
-    ec.SECP384R1() 
+    ec.SECP384R1()
 )
 
 # Minimal subject and issuer details
-subject = issuer = x509.Name([
+subject = x509.Name([
     x509.NameAttribute(NameOID.COMMON_NAME, u"{ip_address}".format(ip_address=ip_address)),
 ])
+
+issuer = CertificateAuthority.get_ca_cert().subject
+
 
 # Generate a basic certificate
 cert = x509.CertificateBuilder().subject_name(
@@ -38,22 +48,27 @@ cert = x509.CertificateBuilder().subject_name(
 ).not_valid_before(
     datetime.datetime.utcnow()
 ).not_valid_after(
-    # Certificate valid for 1 year
-    datetime.datetime.utcnow() + datetime.timedelta(days=1)
-).sign(private_key, hashes.SHA256())
+    datetime.datetime.utcnow() + datetime.timedelta(days=2)
+).add_extension(
+    x509.SubjectAlternativeName([
+        x509.DNSName(u"localhost"),
+        x509.IPAddress(ip_address),
+        x509.IPAddress('0.0.0.0'),
+    ])
+).sign(CertificateAuthority.get_ca_key(), hashes.SHA256())
 
-# Write private key and certificate
-with open("private_key.pem", "wb") as f:
+# Write servers private key and certificate
+with open("server_private_key.pem", "wb") as f:
     f.write(private_key.private_bytes(
         encoding=Encoding.PEM,
         format=PrivateFormat.TraditionalOpenSSL,
         encryption_algorithm=NoEncryption()
     ))
 
-with open("certificate.pem", "wb") as f:
+with open("server_certificate.pem", "wb") as f:
     f.write(cert.public_bytes(Encoding.PEM))
 
 #Assign into variables generate_certificate.CERT_FILE, generate_certificate.KEY_FILE
 
-CERT_FILE = "./certificate.pem"
-KEY_FILE = "./private_key.pem"
+CERT_FILE = "./server_certificate.pem"
+KEY_FILE = "./server_private_key.pem"
